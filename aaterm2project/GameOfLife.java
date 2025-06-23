@@ -13,13 +13,15 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
 {
     // instance variables - replace the example below with your own
 
-    JButton myButton;
+    JButton clearButton;
+    JButton nextButton;
+    
     int width=900;
-    int height=900;
+    int height=800;
     int sqrSize=15;
     int gridSize = 50;
     int total;
-    boolean [][] grid= new boolean [gridSize+1][gridSize+1];
+    boolean [][] grid= new boolean [60][60];
 
     /**
      * Constructor for objects of class GameOfLife
@@ -32,12 +34,19 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
         // setSize(900, 900);
         // setVisible(true);
 
-        myButton = new JButton();
-        myButton.setText("clear");
-        myButton.setBounds (650,300, 200,30);
-        myButton.setFocusable(false);
-        myButton.addActionListener(this);
-        this.add(myButton);
+        clearButton = new JButton();
+        clearButton.setText("clear");
+        clearButton.setBounds (770,350, 100,30);
+        clearButton.setFocusable(false);
+        clearButton.addActionListener(this);
+        this.add(clearButton);
+        
+        nextButton = new JButton();
+        nextButton.setText("next");
+        nextButton.setBounds (770,300, 100,30);
+        nextButton.setFocusable(false);
+        nextButton.addActionListener(this);
+        this.add(nextButton);
 
         
         addMouseListener(this);
@@ -57,8 +66,8 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
     }
 
     public void paint(Graphics g){
-        g.setColor(Color.GRAY);
-        g.fillRect(20, 40, 600, 580);
+        //g.setColor(Color.GRAY);
+        //g.fillRect(50, 50, 500, 500);
         for (int x = 50; x <= 750; x += sqrSize){
             for (int y = 50; y <= 750; y += sqrSize){
                 int squareX= x/sqrSize;
@@ -67,8 +76,8 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
                     g.setColor(Color.BLUE);
                     g.fillRect(x, y, sqrSize, sqrSize);
                 }else{
-                    g.setColor(Color.black);
-                    g.drawRect(x, y, sqrSize, sqrSize);
+                    g.setColor(Color.GRAY);
+                    g.fillRect(x, y, sqrSize, sqrSize);
                 }
             }
         }
@@ -78,13 +87,17 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
     public void actionPerformed(ActionEvent e){
         String cmd=e.getActionCommand();
         System.out.println(cmd);
-        repaint();
-        if(e.getSource()==myButton){
-            for (int x = 0; x <= gridSize; x ++){
-            for (int y = 0; y <= gridSize; y ++){
+        if(e.getSource()==clearButton){
+            for (int x = 0; x <= 55; x ++){
+            for (int y = 0; y <= 55; y ++){
                 grid [x][y] = false;
             }
+            }
+            repaint();
         }
+        
+        if(e.getSource()==nextButton){
+        nextGeneration();
         repaint();
         }
     }
@@ -108,5 +121,21 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
             grid [col][row]=!grid[col][row];
             repaint();
         }
+    }
+    
+    private void nextGeneration(){
+        
+    }
+    
+    private int countNeighbours(){
+        int count =0;
+        for (int dx = -1; dx <= 1; dx ++){
+            for (int dy = -1; dy <= 1; dy ++){
+                
+            }
+            }
+        
+        System.out.println (count);
+        return count;
     }
 }
