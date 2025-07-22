@@ -15,6 +15,8 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
 
     JButton clearButton;
     JButton nextButton;
+    JButton startButton;
+
     
     int width=900;
     int height=800;
@@ -50,6 +52,13 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
         nextButton.addActionListener(this);
         this.add(nextButton);
 
+        startButton = new JButton();
+        startButton.setText("start");
+        startButton.setBounds (770,250, 100,30);
+        startButton.setFocusable(false);
+        startButton.addActionListener(this);
+        this.add(startButton);
+        
         
         addMouseListener(this);
         this.getContentPane().setPreferredSize(new Dimension(width,height));
@@ -68,18 +77,14 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
     }
 
     public void paint(Graphics g){
-        //g.setColor(Color.GRAY);
-        //g.fillRect(50, 50, 500, 500);
-        for (int x = 50; x <= 750; x += sqrSize){
-            for (int y = 50; y <= 750; y += sqrSize){
-                int squareX= x/sqrSize;
-                int squareY = y/sqrSize;
-                if (grid[squareX][squareY]==true){
+        for (int x = 0; x < gridSize; x++) {
+            for (int y = 0; y < gridSize; y++) {
+                if (grid[x][y]) {
                     g.setColor(Color.BLUE);
-                    g.fillRect(x, y, sqrSize, sqrSize);
-                }else{
+                    g.fillRect(x * sqrSize + 50, y * sqrSize + 50, sqrSize, sqrSize);
+                } else {
                     g.setColor(Color.GRAY);
-                    g.fillRect(x, y, sqrSize, sqrSize);
+                    g.fillRect(x * sqrSize + 50, y * sqrSize + 50, sqrSize, sqrSize);
                 }
             }
         }
@@ -102,6 +107,11 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
         nextGeneration();
         repaint();
         }
+        
+        if(e.getSource()==nextButton){
+        nextGeneration();
+        repaint();
+        }
     }
 
     public void mouseExited(MouseEvent e){System.out.println("exit");}
@@ -110,8 +120,8 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
     public void mousePressed(MouseEvent e){System.out.println("press");}
 
     public void mouseClicked(MouseEvent e){
-        int mousex=e.getX();
-        int mousey=e.getY();
+        int mousex=e.getX()-50;
+        int mousey=e.getY()-50;
         int col;
         int row;
 
@@ -126,7 +136,6 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
     }
     
     private void nextGeneration(){
-        
         for (int x=1; x <= 50; x ++){
             for (int y = 1; y <= 50; y ++){
                 cellx=x;
