@@ -17,6 +17,9 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
     JButton nextButton;
     JButton startButton;
 
+    JMenuBar menuBar;
+    JMenu menu;
+    JMenuItem menuItem;
     
     int width=900;
     int height=800;
@@ -37,6 +40,13 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
 
         // setSize(900, 900);
         // setVisible(true);
+        
+        menuBar=new JMenuBar();
+        this.setJMenuBar(menuBar);
+        
+        menu=new JMenu("?");
+        menu.addActionListener(this);
+        menuBar.add(menu);
 
         clearButton = new JButton();
         clearButton.setText("clear");
@@ -76,11 +86,22 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
         }
     }
 
+    
+    void infoBox(){
+        JDialog box = new JDialog(this);
+        box.setBounds(400,400,120,90);
+        TextArea area = new TextArea("more info");
+        box.add(area);
+        box.toFront();
+        box.setVisible(true);
+        box.setTitle("hello");
+    }
+    
     public void paint(Graphics g){
         for (int x = 0; x < gridSize; x++) {
             for (int y = 0; y < gridSize; y++) {
-                if (grid[x][y]) {
-                    g.setColor(Color.BLUE);
+                if (grid[x][y]==true) {
+                    g.setColor(Color.BLACK);
                     g.fillRect(x * sqrSize + 50, y * sqrSize + 50, sqrSize, sqrSize);
                 } else {
                     g.setColor(Color.GRAY);
@@ -93,7 +114,12 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
 
     public void actionPerformed(ActionEvent e){
         String cmd=e.getActionCommand();
-        System.out.println(cmd);
+        
+        
+        if(cmd.equals("?")){
+            infoBox();
+        }
+        
         if(e.getSource()==clearButton){
             for (int x = 0; x <= 55; x ++){
             for (int y = 0; y <= 55; y ++){
@@ -108,14 +134,14 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
         repaint();
         }
         
-        if(e.getSource()==nextButton){
-        nextGeneration();
-        repaint();
+        if(e.getSource()==startButton){
+        
         }
+        System.out.println(cmd);
     }
 
-    public void mouseExited(MouseEvent e){System.out.println("exit");}
-    public void mouseEntered(MouseEvent e){System.out.println("enter");}
+    public void mouseExited(MouseEvent e){}
+    public void mouseEntered(MouseEvent e){}
     public void mouseReleased(MouseEvent e){System.out.println("release");}
     public void mousePressed(MouseEvent e){System.out.println("press");}
 
@@ -136,37 +162,48 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
     }
     
     private void nextGeneration(){
-        for (int x=1; x <= 50; x ++){
-            for (int y = 1; y <= 50; y ++){
-                cellx=x;
-                celly=y;
-                countNeighbours(x,y);
+        boolean[][] tempGrid = new boolean[gridSize][gridSize];
+        
+        for (int x=1; x <= gridSize-1; x ++){
+            for (int y = 1; y <= gridSize-1; y ++){
+            
+                int neighbours = countNeighbours(x,y);
                 
+                if (grid[x][y]==true){
+                    if (neighbours <2 ){
+                        tempGrid[x][y]=false;
+                    }
+                    if (neighbours>3){
+                        tempGrid[x][y] = false;
+                    }
+                }else if(grid[x][y]==false){
+                    if (neighbours ==3){
+                        tempGrid[x][y]=true;
+                    }
+                }
             }
         }
+        grid = tempGrid;
+        repaint();
     }
     
     private int countNeighbours(int x, int y){
-        int count =0;
-        for (int dx = -1; dx <= 1; dx ++){
-            for (int dy = -1; dy <= 1; dy ++){
-                if (dx == 0 && dy == 0) continue;  // Skip the cell itself
+        int count = 0;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx == 0 && dy == 0){
+                continue; // skip self
+                }
 
-                int nx = x+dx;
-                int ny = y+dy;
-                
-                // if(grid[cellx+dx][celly]==true||grid[cellx][celly+dy]==true){
-                     // count++;
-                 // }
-                if (nx >= 0 && ny >= 0 && nx < gridSize && ny < gridSize) {
-                    if (grid[nx][ny]) {
-                        count++;
+                if (x + dx >= 0 && x + dx < gridSize && y + dy >= 0 && y + dy < gridSize) {
+                    if (grid[x + dx][y + dy]==true) {
+                    count++;
                     }
                 }
             }
         }
         
-        System.out.println ("cell: "+cellx+","+celly+" has "+count+" neighbour(s)");
+        System.out.println ("cell: "+x+","+y+" has "+count+" neighbour(s)");
         return count;
     }
 }
