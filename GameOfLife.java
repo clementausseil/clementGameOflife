@@ -28,7 +28,8 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
     int total;
     int cellx=0;
     int celly=0;
-    boolean [][] grid= new boolean [60][60];
+    boolean [][] grid= new boolean [gridSize+1][gridSize+1];
+    boolean [][] tempGrid = new boolean[gridSize][gridSize];
 
     /**
      * Constructor for objects of class GameOfLife
@@ -91,10 +92,10 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
         JDialog box = new JDialog(this);
         box.setBounds(400,400,120,90);
         TextArea area = new TextArea("more info");
+        box.setTitle("Conways game of life");
         box.add(area);
         box.toFront();
         box.setVisible(true);
-        box.setTitle("hello");
     }
     
     public void paint(Graphics g){
@@ -162,28 +163,34 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
     }
     
     private void nextGeneration(){
-        boolean[][] tempGrid = new boolean[gridSize][gridSize];
         
-        for (int x=1; x <= gridSize-1; x ++){
-            for (int y = 1; y <= gridSize-1; y ++){
+        for (int x=0; x <= gridSize-1; x ++){
+            for (int y = 0; y <= gridSize-1; y ++){
             
                 int neighbours = countNeighbours(x,y);
                 
                 if (grid[x][y]==true){
-                    if (neighbours <2 ){
+                    if (neighbours <2 ||neighbours>3 ){
                         tempGrid[x][y]=false;
+                        System.out.println("Cell (" + x + "," + y + ") dies.");
+                    }else{
+                    System.out.println("Cell (" + x + "," + y + ") survives.");
                     }
-                    if (neighbours>3){
-                        tempGrid[x][y] = false;
-                    }
-                }else if(grid[x][y]==false){
+                }else{
                     if (neighbours ==3){
                         tempGrid[x][y]=true;
+                        System.out.println("Cell (" + x + "," + y + ") becomes alive.");
                     }
                 }
             }
         }
-        grid = tempGrid;
+        
+        
+        for (int x = 0; x < gridSize; x++) {
+            for (int y = 0; y < gridSize; y++) {
+                grid[x][y] = tempGrid[x][y];
+            }
+        }
         repaint();
     }
     
@@ -195,15 +202,18 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
                 continue; // skip self
                 }
 
-                if (x + dx >= 0 && x + dx < gridSize && y + dy >= 0 && y + dy < gridSize) {
-                    if (grid[x + dx][y + dy]==true) {
+                int nx=x+dx;
+                int ny = y+dy;
+                
+                if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize) {
+                    if (grid[nx][ny]==true) {
                     count++;
                     }
                 }
             }
         }
         
-        System.out.println ("cell: "+x+","+y+" has "+count+" neighbour(s)");
+        //System.out.println ("cell: "+x+","+y+" has "+count+" neighbour(s)");
         return count;
     }
 }
