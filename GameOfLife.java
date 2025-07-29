@@ -19,7 +19,7 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
 
     JMenuBar menuBar;
     JMenu menu;
-    JMenuItem menuItem;
+    
     
     int width=900;
     int height=800;
@@ -41,6 +41,8 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
 
         // setSize(900, 900);
         // setVisible(true);
+        this.getContentPane().setPreferredSize(new Dimension(width,height));
+        setTitle("Conways game of life");
         
         menuBar=new JMenuBar();
         this.setJMenuBar(menuBar);
@@ -72,7 +74,6 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
         
         
         addMouseListener(this);
-        this.getContentPane().setPreferredSize(new Dimension(width,height));
         this.getContentPane().setLayout(null);        
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.pack();
@@ -80,8 +81,8 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
         this.setVisible(true);
 
 
-        for (int x = 0; x <= gridSize; x ++){
-            for (int y = 0; y <= gridSize; y ++){
+        for (int x = 0; x < gridSize; x ++){
+            for (int y = 0; y < gridSize; y ++){
                 grid [x][y] = false;
             }
         }
@@ -122,10 +123,10 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
         }
         
         if(e.getSource()==clearButton){
-            for (int x = 0; x <= 55; x ++){
-            for (int y = 0; y <= 55; y ++){
-                grid [x][y] = false;
-            }
+            for (int x = 0; x <= gridSize; x ++){
+                for (int y = 0; y <= gridSize; y ++){
+                    grid [x][y] = false;
+                }
             }
             repaint();
         }
@@ -163,18 +164,23 @@ public class GameOfLife extends JFrame implements ActionListener, MouseListener
     }
     
     private void nextGeneration(){
+        for (int x = 0; x < gridSize; x++) {
+            for (int y = 0; y < gridSize; y++) {
+                tempGrid[x][y]=false;
+            }
+        }
         
         for (int x=0; x <= gridSize-1; x ++){
             for (int y = 0; y <= gridSize-1; y ++){
-            
                 int neighbours = countNeighbours(x,y);
-                
                 if (grid[x][y]==true){
-                    if (neighbours <2 ||neighbours>3 ){
+                    
+                    if(neighbours ==2 || neighbours ==3){
+                    tempGrid[x][y]=true;
+                    System.out.println("Cell (" + x + "," + y + ") survives.");
+                    }else{
                         tempGrid[x][y]=false;
                         System.out.println("Cell (" + x + "," + y + ") dies.");
-                    }else{
-                    System.out.println("Cell (" + x + "," + y + ") survives.");
                     }
                 }else{
                     if (neighbours ==3){
