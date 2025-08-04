@@ -25,11 +25,9 @@ public class GameOfLifeFinal extends JFrame implements ActionListener, MouseList
     int height=800;
     int sqrSize=15;
     int gridSize = 50;
-    int total;
-    int cellx=0;
-    int celly=0;
     
-    boolean [][] grid= new boolean [gridSize+1][gridSize+1];
+    
+    boolean [][] grid= new boolean [gridSize][gridSize];
     boolean [][] tempGrid = new boolean[gridSize][gridSize];
 
     Timer timer;
@@ -82,7 +80,6 @@ public class GameOfLifeFinal extends JFrame implements ActionListener, MouseList
         this.getContentPane().setLayout(null);        
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.pack();
-        this.toFront();
         this.setVisible(true);
 
         timer = new Timer(200, e -> {
@@ -131,8 +128,8 @@ public class GameOfLifeFinal extends JFrame implements ActionListener, MouseList
         }
         
         if(e.getSource()==clearButton){
-            for (int x = 0; x <= gridSize; x ++){
-                for (int y = 0; y <= gridSize; y ++){
+            for (int x = 0; x < gridSize; x ++){
+                for (int y = 0; y < gridSize; y ++){
                     grid [x][y] = false;
                 }
             }
