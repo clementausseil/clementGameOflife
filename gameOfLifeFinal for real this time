@@ -1,0 +1,271 @@
+/**
+ * Write a description of class GameOfLife here.
+ *
+ * @author (your name)
+ * @version (a version number or a date)
+ */
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+public class GameOfLife extends JFrame implements ActionListener, MouseListener
+{
+    // instance variables - replace the example below with your own
+
+    JButton clearButton;
+    JButton nextButton;
+    JButton startButton;
+
+    JMenuBar menuBar;
+    JMenu menu;
+    JMenuItem infoItem;
+    JMenuItem ruleItem;
+
+    
+    final int WIDTH=950;
+    final int HEIGHT=800;
+    final int SQR_SIZE=15;
+    final int GRID_SIZE = 50;
+    
+
+    boolean [][] grid= new boolean [GRID_SIZE][GRID_SIZE];
+    boolean [][] tempGrid = new boolean[GRID_SIZE][GRID_SIZE];
+
+    Timer timer;
+    boolean running = false;
+    /**
+     * Constructor for objects of class GameOfLife
+     */
+    public GameOfLife()
+    {
+        // initialise instance variables
+
+        
+        setTitle("Conways game of life");
+        
+        //creating the menu bar
+        menuBar=new JMenuBar();
+        menu=new JMenu("?");
+        infoItem = new JMenuItem("info");
+        infoItem.addActionListener(e -> infoBox());
+        ruleItem = new JMenuItem("rules");
+        ruleItem.addActionListener(e -> ruleBox());
+        
+        menuBar.add(menu);
+        menu.add(infoItem);
+        menu.add(ruleItem);
+        
+        this.setJMenuBar(menuBar);
+
+        //layout
+        this.getContentPane().setLayout(null); 
+        this.getContentPane().setPreferredSize(new Dimension(WIDTH,HEIGHT));
+
+        
+        //buttons
+        clearButton = new JButton();
+        clearButton.setText("clear");
+        clearButton.setBounds (840,350, 100,30);
+        clearButton.setFocusable(false);
+        clearButton.addActionListener(this);
+        this.add(clearButton);
+        
+        nextButton = new JButton();
+        nextButton.setText("next");
+        nextButton.setBounds (840,300, 100,30);
+        nextButton.setFocusable(false);
+        nextButton.addActionListener(this);
+        this.add(nextButton);
+
+        startButton = new JButton();
+        startButton.setText("start");
+        startButton.setBounds (840,250, 100,30);
+        startButton.setFocusable(false);
+        startButton.addActionListener(this);
+        this.add(startButton);
+        
+        //mouse listener
+        addMouseListener(this);
+               
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.pack();
+        this.toFront();
+        this.setVisible(true);
+
+        //timer
+        timer = new Timer(200, e -> {
+            nextGeneration();
+        });
+        
+        
+        for (int x = 0; x < GRID_SIZE; x ++){
+            for (int y = 0; y < GRID_SIZE; y ++){
+                grid [x][y] = false;
+            }
+        }
+    }
+
+    /*
+     * dialog box for when you click on the info menu 
+     */
+    void infoBox(){
+        String text ="Conway's game of life, click to toggle cells, 'start' button to start simulation, 'next' button to go one generation forwards";
+        JOptionPane.showMessageDialog(null,text, null,JOptionPane.INFORMATION_MESSAGE);
+    }
+    /*
+     * dialog box for when you click on the rules menu 
+     */
+    void ruleBox(){
+        String text =" Any live cell with <2 live neighbours dies, as if by underpopulation. Any live cell with 2 or 3 live neighbours survives. Any live cell with >3 live neighbours dies, as if by overpopulation. Any dead cell with exactly 3 live neighbours becomes a live cell, as if by reproduction.";
+        JOptionPane.showMessageDialog(null,text, "Conway's game of life: rules", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    /*
+     * paint function
+     * draws the grid
+     */
+    public void paint(Graphics g){
+        super.paint(g);
+        for (int x = 0; x < GRID_SIZE; x++) {
+            for (int y = 0; y < GRID_SIZE; y++) {
+                if (grid[x][y]==true) {
+                    g.setColor(Color.BLACK);
+                    g.fillRect(x * SQR_SIZE + 50, y * SQR_SIZE + 50, SQR_SIZE, SQR_SIZE);
+                } else {
+                    g.setColor(Color.GRAY);
+                    g.fillRect(x * SQR_SIZE + 50, y * SQR_SIZE + 50, SQR_SIZE, SQR_SIZE);
+                }
+            }
+        }
+
+    }
+
+    /*
+     * action performed function
+     * for buttons and menus
+     */
+    public void actionPerformed(ActionEvent e){
+        String cmd=e.getActionCommand();
+        
+        if(cmd.equals("?")){
+            infoBox();
+        }
+        
+        if(e.getSource()==clearButton){
+            for (int x = 0; x < GRID_SIZE; x ++){
+                for (int y = 0; y < GRID_SIZE; y ++){
+                    grid [x][y] = false;
+                }
+            }
+            repaint();
+        }
+        
+        if(e.getSource()==nextButton){
+        nextGeneration();
+        repaint();
+        }
+        
+        if(e.getSource()==startButton){
+            running = !running;
+            if (running) {
+                startButton.setText("Stop");
+                timer.start();
+            } else {
+                startButton.setText("Start");
+                timer.stop();
+            }
+        }
+        System.out.println(cmd);
+    }
+
+    /*
+     * mouse listener functions
+     * first four aren't important 
+     * the mouseClicked one is the one we care about for toggling the cells
+     */
+    public void mouseExited(MouseEvent e){}
+    public void mouseEntered(MouseEvent e){}
+    public void mouseReleased(MouseEvent e){System.out.println("release");}
+    public void mousePressed(MouseEvent e){System.out.println("press");}
+    
+    public void mouseClicked(MouseEvent e){
+        int mousex=e.getX()-50;
+        int mousey=e.getY()-50;
+        int col;
+        int row;
+
+        System.out.println("click at"+mousex+", "+mousey);
+        if (mousex >= 0 && mousex < GRID_SIZE * SQR_SIZE && 
+        mousey >= 0 && mousey < GRID_SIZE * SQR_SIZE){
+            col = mousex/SQR_SIZE;
+            row = mousey/SQR_SIZE;
+            grid [col][row]=!grid[col][row];
+            repaint();
+        }
+    }
+    /*
+     * function that codes the rules of conways game of life 
+     */
+    private void nextGeneration(){
+        for (int x = 0; x < GRID_SIZE; x++) {
+            for (int y = 0; y < GRID_SIZE; y++) {
+                tempGrid[x][y]=false;
+            }
+        }
+        
+        for (int x=0; x < GRID_SIZE; x ++){
+            for (int y = 0; y < GRID_SIZE; y ++){
+                int neighbours = countNeighbours(x,y);
+                if (grid[x][y]==true){
+                    
+                    if(neighbours ==2 || neighbours ==3){
+                    tempGrid[x][y]=true;
+                    System.out.println("Cell (" + x + "," + y + ") survives.");
+                    }else{
+                        tempGrid[x][y]=false;
+                        System.out.println("Cell (" + x + "," + y + ") dies.");
+                    }
+                }else{
+                    if (neighbours ==3){
+                        tempGrid[x][y]=true;
+                        System.out.println("Cell (" + x + "," + y + ") becomes alive.");
+                    }
+                }
+            }
+        }
+        
+        
+        for (int x = 0; x < GRID_SIZE; x++) {
+            for (int y = 0; y < GRID_SIZE; y++) {
+                grid[x][y] = tempGrid[x][y];
+            }
+        }
+        repaint();
+    }
+    /*
+     * function that counts how many live neighbours a cell has 
+     */
+    private int countNeighbours(int x, int y){
+        int count = 0;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx == 0 && dy == 0){
+                continue; // skip self
+                }
+
+                int nx=x+dx;
+                int ny = y+dy;
+                
+                if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+                    if (grid[nx][ny]==true) {
+                    count++;
+                    }
+                }
+            }
+        }
+        
+        //System.out.println ("cell: "+x+","+y+" has "+count+" neighbour(s)");
+        return count;
+    }
+}
