@@ -1,0 +1,299 @@
+/**
+ *class GameOfLife:
+ *
+ *runs Conway's Game of Life in a java GUI
+ *
+ * @author Clement Ausseil
+ * @version final version
+ */
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+public class GameOfLife extends JFrame implements ActionListener, MouseListener
+{
+
+    //constants
+    final int WIDTH=950;
+    final int HEIGHT=800;
+    final int SQR_SIZE=15;
+    final int GRID_SIZE = 50;
+    final int GRID_OFFSET_X = 25;
+    final int GRID_OFFSET_Y =25;
+
+    //game state
+    boolean [][] grid= new boolean [GRID_SIZE][GRID_SIZE];
+    boolean [][] tempGrid = new boolean[GRID_SIZE][GRID_SIZE];
+    Timer timer;
+    boolean running = false;
+
+    JButton clearButton, nextButton, startButton;
+
+    JMenuBar menuBar;
+    JMenu menu;
+    JMenuItem helpItem;
+    JMenuItem infoItem;
+    JMenuItem ruleItem;
+
+    GamePanel gamePanel;
+
+    /**
+     * Constructor for objects of class GameOfLife
+     */
+    public GameOfLife()
+    {
+        // initialise instance variables
+
+        setTitle("Conways game of life");
+        this.getContentPane().setLayout(null); 
+        this.getContentPane().setPreferredSize(new Dimension(WIDTH,HEIGHT));
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        //creating the menu bar
+        menuBar=new JMenuBar();
+        menu=new JMenu("?");
+        infoItem = new JMenuItem("info");
+        infoItem.addActionListener(e -> infoBox());
+        ruleItem = new JMenuItem("rules");
+        ruleItem.addActionListener(e -> ruleBox());
+        helpItem = new JMenuItem("help");
+        helpItem.addActionListener(e -> helpBox());
+        menuBar.add(menu);
+        menu.add(helpItem);
+        menu.add(infoItem);
+        menu.add(ruleItem);
+        this.setJMenuBar(menuBar);
+
+
+        // Game drawing panel
+        gamePanel = new GamePanel();
+        gamePanel.setBounds(0, 0, GRID_SIZE * SQR_SIZE + GRID_OFFSET_X * 2,
+            GRID_SIZE * SQR_SIZE + GRID_OFFSET_Y * 2);
+        gamePanel.addMouseListener(this);
+        add(gamePanel);
+
+        //buttons
+        //'clear' button
+        clearButton = new JButton();
+        clearButton.setText("clear");
+        clearButton.setBounds (840,350, 100,30);
+        clearButton.setFocusable(false);
+        clearButton.addActionListener(this);
+        this.add(clearButton);
+        //'next' button
+        nextButton = new JButton();
+        nextButton.setText("next");
+        nextButton.setBounds (840,300, 100,30);
+        nextButton.setFocusable(false);
+        nextButton.addActionListener(this);
+        this.add(nextButton);
+        //'start' button
+        startButton = new JButton();
+        startButton.setText("start");
+        startButton.setBounds (840,250, 100,30);
+        startButton.setFocusable(false);
+        startButton.addActionListener(this);
+        this.add(startButton);
+
+        //timer
+        timer = new Timer(200, e -> {
+            nextGeneration();
+            gamePanel.repaint();
+        });
+
+        pack();
+        this.toFront();
+        this.setVisible(true);
+    }
+
+    /*
+     * dialog box for when you click on the help menu 
+     */
+    void helpBox(){
+        String text ="Conway's game of life:\n"
+            +"click to toggle cells\n"
+            +"'start' button to start simulation\n"
+            +"'next' button to go one generation forwards";
+        JOptionPane.showMessageDialog(null,text, null,JOptionPane.INFORMATION_MESSAGE);
+    }
+    /*
+     * dialog box for when you click on the info menu 
+     */
+    void infoBox(){
+        String text ="Conway's game of life:\n"
+            +"Conway's Game of Life,is a zero-player game, meaning that its evolution is determined by its initial state,requiring no further input.\n"
+            +"One interacts with the Game of Life by creating an initial configuration and observing how it evolves.\n"
+            +"each cell is either live or dead, the simulation evolves one generation at a time, the state of each cell is determined by a set of rules.\n"
+            +"click the 'rules' menu to see the logic behind how the cells change.";
+        JOptionPane.showMessageDialog(null,text, null,JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /*
+     * dialog box for when you click on the rules menu 
+     */
+    void ruleBox(){
+        String text =" Any live cell with less than 2 live neighbours dies, as if by underpopulation.\n"
+            +"Any live cell with 2 or 3 live neighbours survives.\n"
+            +"Any live cell with more than 3 live neighbours dies, as if by overpopulation.\n"
+            +"Any dead cell with exactly 3 live neighbours becomes a live cell, as if by reproduction.";
+        JOptionPane.showMessageDialog(null,text, "Conway's game of life: rules", JOptionPane.INFORMATION_MESSAGE);
+    }
+    /*
+    * class for drawing the panel
+    */
+    class GamePanel extends JPanel {
+        public GamePanel() {
+            setBackground(Color.WHITE);
+        }
+
+        /*
+         * paint function
+         * draws the grid
+         */
+        protected void paintComponent(Graphics g){
+            super.paintComponent(g);
+            for (int x = 0; x < GRID_SIZE; x++) {
+                for (int y = 0; y < GRID_SIZE; y++) {
+                    if (grid[x][y]==true) {
+                        g.setColor(Color.BLACK);
+                        g.fillRect(x * SQR_SIZE +GRID_OFFSET_X, y * SQR_SIZE + GRID_OFFSET_Y, SQR_SIZE, SQR_SIZE);
+                    } else {
+                        g.setColor(Color.GRAY);
+                        g.fillRect(x * SQR_SIZE + GRID_OFFSET_X, y * SQR_SIZE + GRID_OFFSET_Y, SQR_SIZE, SQR_SIZE);
+                    }
+                    g.setColor(Color.BLACK);
+                    g.drawRect(x * SQR_SIZE + GRID_OFFSET_X, y * SQR_SIZE + GRID_OFFSET_Y, SQR_SIZE, SQR_SIZE);
+                }
+            }
+        }
+    }
+    
+    /*
+     * action performed function
+     * for buttons and menus
+     */
+    public void actionPerformed(ActionEvent e){
+        String cmd=e.getActionCommand();
+
+        if(e.getSource()==clearButton){
+            for (int x = 0; x < GRID_SIZE; x ++){
+                for (int y = 0; y < GRID_SIZE; y ++){
+                    grid [x][y] = false;
+                }
+            }
+            gamePanel.repaint();
+        }
+
+        if(e.getSource()==nextButton){
+            nextGeneration();
+            gamePanel.repaint();
+        }
+
+        if(e.getSource()==startButton){
+            running = !running;
+            if (running) {
+                startButton.setText("Stop");
+                timer.start();
+            } else {
+                startButton.setText("Start");
+                timer.stop();
+            }
+        }
+        System.out.println(cmd);
+    }
+
+    /*
+     * mouse listener functions
+     * first four aren't important 
+     * the mouseClicked one is the one we care about for toggling the cells
+     */
+    public void mouseExited(MouseEvent e){}
+    public void mouseEntered(MouseEvent e){}
+    public void mouseReleased(MouseEvent e){System.out.println("release");}
+    public void mousePressed(MouseEvent e){System.out.println("press");}
+
+    public void mouseClicked(MouseEvent e){
+        int mousex=e.getX()-GRID_OFFSET_X;
+        int mousey=e.getY()-GRID_OFFSET_Y;
+        int col;
+        int row;
+
+        System.out.println("click at"+mousex+", "+mousey);
+        if (mousex >= 0 && mousex < GRID_SIZE * SQR_SIZE && 
+        mousey >= 0 && mousey < GRID_SIZE * SQR_SIZE){
+            col = mousex/SQR_SIZE;
+            row = mousey/SQR_SIZE;
+            grid [col][row]=!grid[col][row];
+            gamePanel.repaint();
+        }
+    }
+
+    /*
+     * function that codes the rules of conways game of life 
+     */
+    private void nextGeneration(){
+        // setting the temporary grid to be empty
+        for (int x = 0; x < GRID_SIZE; x++) {
+            for (int y = 0; y < GRID_SIZE; y++) {
+                tempGrid[x][y]=false;
+            }
+        }
+
+        for (int x=0; x < GRID_SIZE; x ++){
+            for (int y = 0; y < GRID_SIZE; y ++){
+                int neighbours = countNeighbours(x,y);
+                if (grid[x][y]==true){
+
+                    if(neighbours ==2 || neighbours ==3){
+                        tempGrid[x][y]=true;//temporary grid holds all the new changes
+                        System.out.println("Cell (" + x + "," + y + ") survives.");
+                    }else{
+                        tempGrid[x][y]=false;
+                        System.out.println("Cell (" + x + "," + y + ") dies.");
+                    }
+                }else{
+                    if (neighbours ==3){
+                        tempGrid[x][y]=true;
+                        System.out.println("Cell (" + x + "," + y + ") becomes alive.");
+                    }
+                }
+            }
+        }
+
+        for (int x = 0; x < GRID_SIZE; x++) {
+            for (int y = 0; y < GRID_SIZE; y++) {
+                // the grid becomes the same as the temporary grid
+                grid[x][y] = tempGrid[x][y];
+            }
+        }
+        gamePanel.repaint();
+    }
+
+    /*
+     * function that counts how many live neighbours a cell has 
+     */
+    private int countNeighbours(int x, int y){
+        int count = 0;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx == 0 && dy == 0){
+                    continue; // skip self
+                }
+
+                int nx=x+dx;
+                int ny = y+dy;
+                
+                //only check cells that are within the grid boundaries
+                if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+                    if (grid[nx][ny]==true) {
+                        count++;
+                    }
+                }
+            }
+        }
+
+        //System.out.println ("cell: "+x+","+y+" has "+count+" neighbour(s)");
+        return count;
+    }
+}
